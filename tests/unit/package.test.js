@@ -7,7 +7,7 @@ const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
 
 test('package publishes ESM, CSS, and declarations with zero runtime dependencies', async () => {
   assert.equal(pkg.name, '@ztechjs/zt-alert')
-  assert.equal(pkg.version, '0.1.1')
+  assert.equal(pkg.version, '0.1.2')
   assert.equal(pkg.type, 'module')
   assert.equal(pkg.exports['.'].import, './dist/index.js')
   assert.equal(pkg.exports['.'].types, './types/index.d.ts')
