@@ -1,0 +1,66 @@
+{
+  "name": "@ztechjs/zt-alert",
+  "version": "0.1.1",
+  "description": "Framework-free message, notification, message box, dialog, drawer, and loading APIs.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ztech",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevqin/zt-alert.git"
+  },
+  "homepage": "https://github.com/stevqin/zt-alert#readme",
+  "bugs": {
+    "url": "https://github.com/stevqin/zt-alert/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "types",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "capture": "node scripts/capture-demo.js",
+    "dev": "node scripts/serve.js",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:types": "tsc -p tests/types/tsconfig.json",
+    "test:browser": "playwright test --project=chromium",
+    "test:webkit": "playwright test --project=webkit",
+    "test:all": "npm test && npm run test:webkit",
+    "test": "npm run test:unit && npm run test:types && npm run test:browser",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "message",
+    "notification",
+    "dialog",
+    "drawer",
+    "vanilla-javascript"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZT Alert Tests</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <button id="origin" type="button">原始焦点</button>
+  <main id="fixture"></main>
+  <script type="module">
+    import * as api from '/src/index.js'
+    window.api = api
+    window.dispatchEvent(new Event('zt-ready'))
+  </script>
+</body>
+</html>

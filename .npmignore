@@ -1,0 +1,8 @@
+demo/
+docs/
+scripts/
+src/
+tests/
+playwright.config.js
+playwright-report/
+test-results/

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZT Alert 交互台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/demo/demo.css">
+</head>
+<body>
+  <header class="workbench-header">
+    <div>
+      <p class="workbench-kicker">@ztechjs/zt-alert</p>
+      <h1>ZT Alert 交互台</h1>
+    </div>
+    <span class="runtime-status"><span aria-hidden="true"></span>纯 JavaScript · ESM</span>
+  </header>
+
+  <main class="workbench">
+    <section class="control-section" aria-labelledby="message-heading">
+      <div class="section-heading">
+        <h2 id="message-heading">Message</h2>
+        <code>3200ms · top center</code>
+      </div>
+      <div class="control-stack">
+        <div class="control-row">
+          <button type="button" data-action="message-success">成功消息</button>
+          <button type="button" data-action="message-warning">警告消息</button>
+          <button type="button" data-action="message-error">错误消息</button>
+          <button type="button" data-action="message-info">提示消息</button>
+          <button type="button" data-action="message-update">更新常驻消息</button>
+          <button type="button" data-action="message-stack">堆叠动画</button>
+          <button type="button" data-action="message-clear" class="quiet">清空</button>
+        </div>
+        <fieldset class="control-group">
+          <legend>内容场景</legend>
+          <div class="control-row">
+            <button type="button" data-action="message-no-title-short">无标题短内容</button>
+            <button type="button" data-action="message-title-short">有标题短内容</button>
+            <button type="button" data-action="message-no-title-long">无标题长内容</button>
+            <button type="button" data-action="message-title-long">有标题长内容</button>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="control-section" aria-labelledby="notification-heading">
+      <div class="section-heading">
+        <h2 id="notification-heading">Notification</h2>
+        <code>5200ms · top right</code>
+      </div>
+      <div class="control-stack">
+        <div class="control-row">
+          <button type="button" data-action="notification-info">系统通知</button>
+          <button type="button" data-action="notification-success">导出完成</button>
+          <button type="button" data-action="notification-warning">库存提醒</button>
+          <button type="button" data-action="notification-error">同步异常</button>
+          <button type="button" data-action="notification-stack">堆叠动画</button>
+          <button type="button" data-action="notification-clear" class="quiet">清空</button>
+        </div>
+        <fieldset class="control-group">
+          <legend>内容场景</legend>
+          <div class="control-row">
+            <button type="button" data-action="notification-no-title-short">无标题短内容</button>
+            <button type="button" data-action="notification-title-short">有标题短内容</button>
+            <button type="button" data-action="notification-no-title-long">无标题长内容</button>
+            <button type="button" data-action="notification-title-long">有标题长内容</button>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="control-section box-demo" aria-labelledby="box-heading">
+      <div class="section-heading">
+        <h2 id="box-heading">MessageBox</h2>
+        <code>alert · confirm · prompt</code>
+      </div>
+      <div class="control-stack">
+        <fieldset class="control-group">
+          <legend>弹窗选项</legend>
+          <div class="control-options">
+            <label><input id="box-shake" type="checkbox" checked>回弹动画</label>
+            <label><input id="box-mask-close" type="checkbox" checked>点击遮罩关闭</label>
+            <label><input id="box-esc-close" type="checkbox" checked>Esc 关闭</label>
+          </div>
+        </fieldset>
+        <fieldset class="control-group">
+          <legend>状态图标</legend>
+          <div class="control-row">
+            <button type="button" data-action="box-alert"><span class="status-swatch status-swatch--success" aria-hidden="true"></span>成功</button>
+            <button type="button" data-action="box-warning"><span class="status-swatch status-swatch--warning" aria-hidden="true"></span>警告</button>
+            <button type="button" data-action="box-error"><span class="status-swatch status-swatch--error" aria-hidden="true"></span>错误</button>
+            <button type="button" data-action="box-info"><span class="status-swatch status-swatch--info" aria-hidden="true"></span>信息</button>
+            <button type="button" data-action="box-no-icon">无图标</button>
+            <button type="button" data-action="box-custom-icon">自定义图片</button>
+            <button type="button" data-action="box-sequence" class="quiet">逐个查看</button>
+          </div>
+        </fieldset>
+        <fieldset class="control-group">
+          <legend>交互流程</legend>
+          <div class="control-row">
+            <button type="button" data-action="box-normal-confirm">普通确认</button>
+            <button type="button" data-action="box-confirm">危险确认</button>
+            <button type="button" data-action="box-prompt">名称输入</button>
+            <button type="button" data-action="box-async">异步加载</button>
+            <button type="button" data-action="box-timer">自动关闭</button>
+            <button type="button" data-action="box-no-buttons">无按钮提示</button>
+          </div>
+        </fieldset>
+        <fieldset class="control-group">
+          <legend>内容与按钮</legend>
+          <div class="control-row">
+            <button type="button" data-action="box-content">自定义内容</button>
+            <button type="button" data-action="box-long-text">长文本</button>
+            <button type="button" data-action="box-buttons">多按钮选择</button>
+            <button type="button" data-action="box-custom-button">自定义按钮</button>
+          </div>
+        </fieldset>
+        <div class="demo-result">
+          <span id="box-result-label">最近返回值</span>
+          <output id="box-result" aria-labelledby="box-result-label" aria-live="polite" aria-atomic="true">尚无操作</output>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-section" aria-labelledby="overlay-heading">
+      <div class="section-heading">
+        <h2 id="overlay-heading">Dialog & Drawer</h2>
+        <code>focus trap · async close gate</code>
+      </div>
+      <div class="control-row">
+        <button type="button" data-action="dialog">打开 Dialog</button>
+        <button type="button" data-action="dialog-loading">加载 Dialog</button>
+        <button type="button" data-action="drawer">打开 Drawer</button>
+        <button type="button" data-action="nested">嵌套浮层</button>
+      </div>
+    </section>
+
+    <section class="control-section" aria-labelledby="loading-heading">
+      <div class="section-heading">
+        <h2 id="loading-heading">Loading</h2>
+        <code>open · update · close</code>
+      </div>
+      <div class="control-row">
+        <button type="button" data-action="loading">默认加载</button>
+        <button type="button" data-action="loading-custom">图标与文字</button>
+        <button type="button" data-action="loading-update">更新加载内容</button>
+        <button type="button" data-action="loading-dark">深色遮罩</button>
+        <button type="button" data-action="loading-light">浅色遮罩</button>
+        <button type="button" data-action="loading-mask-update">切换遮罩</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="workbench-footer">
+    <span>Chrome 80+</span><span>Safari 13+</span><span>Runtime dependencies: 0</span>
+  </footer>
+  <script type="module" src="/demo/demo.js"></script>
+</body>
+</html>

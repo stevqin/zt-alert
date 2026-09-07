@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect x="2" y="2" width="76" height="76" rx="18" fill="#e8f5f1"/>
+  <rect x="2.5" y="2.5" width="75" height="75" rx="17.5" fill="none" stroke="#9bcfc0"/>
+  <text x="40" y="42" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#117d68">ZT</text>
+</svg>
