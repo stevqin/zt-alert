@@ -1,6 +1,7 @@
 import { createFocusManager } from './core/focus-manager.js'
 import { enterLayer, isTopLayer, leaveLayer, subscribeLayerChanges } from './core/layer-manager.js'
 import { lockBody, unlockBody } from './core/scroll-lock.js'
+import { afterPanelExit, rememberExitPose } from './core/panel-motion.js'
 
 const BUILTIN_ICONS = new Set(['success', 'warning', 'error', 'info'])
 const DEFAULTS = {
@@ -259,6 +260,7 @@ function openMessageBox(params) {
       if (closing) return
       closing = true
       clearTimeout(timer)
+      rememberExitPose(controller.elements.box)
       controller.elements.layer.classList.add('zt-box-layer--leaving')
       let finished = false
       const finish = () => {
@@ -277,13 +279,13 @@ function openMessageBox(params) {
         finish()
         return
       }
-      controller.elements.layer.addEventListener('transitionend', finish, { once: true })
-      setTimeout(finish, 260)
+      afterPanelExit(controller.elements.layer, controller.elements.box, finish)
     }
   }
 
   const promise = new Promise(resolve => { resolvePromise = resolve })
   controller.elements = renderBox(model, controller)
+  controller.elements.layer.classList.toggle('zt-box-layer--steady', !model.shake)
   controller.focus = createFocusManager({ id, panel: () => controller.elements.box })
   controllers.add(controller)
   current = controller

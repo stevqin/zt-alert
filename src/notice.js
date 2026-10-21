@@ -1,3 +1,5 @@
+import { motionDuration, rememberExitPose } from './core/panel-motion.js'
+
 const STATUS_NAMES = new Set(['success', 'error', 'warning', 'info'])
 let noticeSequence = 0
 
@@ -62,8 +64,30 @@ export function createNoticeService({ variant, defaultDuration }) {
   function cancelRemoval(item) {
     clearTimeout(item.removalTimer)
     item.removalTimer = undefined
-    if (item.onExit) item.element.removeEventListener('transitionend', item.onExit)
+    if (item.onExit) item.element.removeEventListener('animationend', item.onExit)
     item.onExit = undefined
+  }
+
+  function settleEntrance(item) {
+    clearTimeout(item.enterTimer)
+    item.enterTimer = undefined
+    if (item.onEnter) item.element.removeEventListener('animationend', item.onEnter)
+    item.onEnter = undefined
+    item.motion = ''
+    item.element.classList.remove('zt-notice--entering', 'zt-notice--reviving')
+  }
+
+  function watchEntrance(item, name) {
+    const duration = motionDuration(item.element, true)
+    if (duration === 0) {
+      settleEntrance(item)
+      return
+    }
+    item.onEnter = event => {
+      if (event.target === item.element && event.animationName === name) settleEntrance(item)
+    }
+    item.element.addEventListener('animationend', item.onEnter)
+    item.enterTimer = setTimeout(() => settleEntrance(item), duration + 50)
   }
 
   function relayout(change) {
@@ -88,7 +112,7 @@ export function createNoticeService({ variant, defaultDuration }) {
 
   function render(item) {
     const { element, options } = item
-    element.className = `zt-notice zt-notice--${options.status} zt-notice--${variant}${item.visible ? ' zt-notice--visible' : ''}`
+    element.className = `zt-notice zt-notice--${options.status} zt-notice--${variant}${item.visible ? ' zt-notice--visible' : ''}${item.motion ? ` zt-notice--${item.motion}` : ''}`
     element.setAttribute('role', options.status === 'error' ? 'alert' : 'status')
     element.dataset.ztId = String(item.id)
     if (item.iconStatus !== options.status) {
@@ -123,7 +147,7 @@ export function createNoticeService({ variant, defaultDuration }) {
       '<span class="zt-notice__body"></span>',
       `<button class="zt-notice__close" type="button" aria-label="关闭">${closeMarkup()}</button>`
     ].join('')
-    const item = { element, slot, id, options, iconStatus: undefined, timer: undefined, closing: false, visible: false, frame: undefined, removalTimer: undefined, onExit: undefined }
+    const item = { element, slot, id, options, iconStatus: undefined, timer: undefined, closing: false, visible: false, motion: '', enterTimer: undefined, onEnter: undefined, frame: undefined, removalTimer: undefined, onExit: undefined }
     element.querySelector('.zt-notice__close').addEventListener('click', () => close(id))
     render(item)
     slot.append(element)
@@ -135,7 +159,9 @@ export function createNoticeService({ variant, defaultDuration }) {
       item.frame = undefined
       if (items.get(id) !== item || item.closing) return
       item.visible = true
-      element.classList.add('zt-notice--visible')
+      item.motion = 'entering'
+      element.classList.add('zt-notice--visible', 'zt-notice--entering')
+      watchEntrance(item, 'zt-notice-enter')
     })
     return item
   }
@@ -145,12 +171,21 @@ export function createNoticeService({ variant, defaultDuration }) {
     const id = options.id ?? `zt-${variant}-${++noticeSequence}`
     const existing = items.get(id)
     if (existing) {
+      const reviving = existing.closing
+      if (reviving) {
+        const style = getComputedStyle(existing.element)
+        existing.element.style.setProperty('--zt-notice-revive-transform', style.transform === 'none' ? 'scale(1)' : style.transform)
+        existing.element.style.setProperty('--zt-notice-revive-opacity', style.opacity)
+        settleEntrance(existing)
+        existing.motion = 'reviving'
+      }
       cancelRemoval(existing)
       existing.closing = false
       relayout(() => {
         existing.options = options
         render(existing)
       })
+      if (reviving) watchEntrance(existing, 'zt-notice-revive')
       schedule(existing)
       return id
     }
@@ -171,6 +206,7 @@ export function createNoticeService({ variant, defaultDuration }) {
     const remove = () => {
       if (items.get(id) !== item || !item.closing) return
       cancelRemoval(item)
+      settleEntrance(item)
       relayout(() => {
         items.delete(id)
         item.slot.remove()
@@ -184,18 +220,19 @@ export function createNoticeService({ variant, defaultDuration }) {
       remove()
       return
     }
+    rememberExitPose(item.element)
+    item.element.style.setProperty('--zt-notice-exit-opacity', getComputedStyle(item.element).opacity)
+    settleEntrance(item)
     item.element.classList.add('zt-notice--leaving')
-    const duration = Math.max(0, ...getComputedStyle(item.element).transitionDuration.split(',').map(value => (
-      parseFloat(value) * (value.trim().endsWith('ms') ? 1 : 1000)
-    )))
+    const duration = motionDuration(item.element, true)
     if (duration === 0) {
       remove()
       return
     }
     item.onExit = event => {
-      if (event.target === item.element && event.propertyName === 'transform') remove()
+      if (event.target === item.element && event.animationName === 'zt-notice-exit') remove()
     }
-    item.element.addEventListener('transitionend', item.onExit)
+    item.element.addEventListener('animationend', item.onExit)
     item.removalTimer = setTimeout(remove, duration + 50)
   }
 

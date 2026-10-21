@@ -5,12 +5,22 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => Boolean(window.api))
 })
 
+async function openPausedBox(page, options) {
+  await page.evaluate(async options => {
+    window.boxPromise = window.api.ZtMessageBox(options)
+    // Pause in the first rendered frame, before a slow test runner can miss
+    // the short entrance. The real CSS animations remain available to sample.
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    for (const animation of document.querySelector('.zt-box').getAnimations({ subtree: true })) animation.pause()
+  }, options)
+}
+
 for (const icon of ['success', 'error', 'warning', 'info']) {
   test(`${icon} starts drawing when the box begins shrinking after its first peak`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.evaluate(icon => { window.api.ZtMessageBox({ title: '动画预览', icon }) }, icon)
+    await openPausedBox(page, { title: '动画预览', icon })
     await expect.poll(() => page.locator('.zt-box').evaluate(box => (
-      box.getAnimations().some(animation => animation.animationName === 'zt-box-enter')
+      box.getAnimations().some(animation => animation.animationName === 'zt-panel-enter')
     ))).toBe(true)
     await expect(page.locator('.zt-box__icon-frame path')).toHaveCount(1)
     if (icon === 'warning' || icon === 'info') {
@@ -20,7 +30,7 @@ for (const icon of ['success', 'error', 'warning', 'info']) {
     }
 
     const samples = await page.locator('.zt-box').evaluate(async box => {
-      const entrance = box.getAnimations().find(animation => animation.animationName === 'zt-box-enter')
+      const entrance = box.getAnimations().find(animation => animation.animationName === 'zt-panel-enter')
       const frame = box.querySelector('.zt-box__icon-frame')
       const softening = frame.getAnimations()[0]
       if (!softening) throw new Error('The border must soften after drawing completes')
@@ -29,7 +39,7 @@ for (const icon of ['success', 'error', 'warning', 'info']) {
       if (!drawings.every(Boolean)) throw new Error('Every built-in icon stroke must animate')
       await Promise.all([entrance, ...drawings, softening].map(animation => animation.ready))
       const duration = entrance.effect.getTiming().duration
-      const peakTime = duration * 0.45
+      const peakTime = duration * 0.33
       const drawingEnd = drawings[0].effect.getTiming().delay + drawings[0].effect.getTiming().duration
       const softenTiming = softening.effect.getTiming()
       const starts = drawings.map(animation => ({
@@ -63,14 +73,14 @@ for (const icon of ['success', 'error', 'warning', 'info']) {
         beforePeak: sample(peakTime - 1),
         peak: sample(peakTime),
         drawing: sample(peakTime + 70),
-        trough: sample(duration * 0.75),
+        trough: sample(duration * 0.55),
         drawn: sample(drawingEnd),
         softening: sample(drawingEnd + softenTiming.duration / 2),
         complete: sample(softenTiming.delay + softenTiming.duration + 1)
       }
     })
 
-    expect(samples.duration).toBe(280)
+    expect(samples.duration).toBe(560)
     expect(samples.glyphWidth).toBe('44px')
     expect(samples.softenDelay).toBeCloseTo(samples.drawingEnd, 3)
     expect(samples.softenStartDifference).toBeCloseTo(0, 1)
@@ -137,13 +147,13 @@ test('shake false keeps the box steady and starts drawing without a delay', asyn
 
 test('closing during entrance cancels the bounce and resolves normally', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.evaluate(() => { window.boxPromise = window.api.ZtMessageBox({ title: '提前关闭', icon: 'success' }) })
-  await expect.poll(() => page.locator('.zt-box').evaluate(box => box.getAnimations().some(animation => animation.animationName === 'zt-box-enter'))).toBe(true)
+  await openPausedBox(page, { title: '提前关闭', icon: 'success' })
+  await expect.poll(() => page.locator('.zt-box').evaluate(box => box.getAnimations().some(animation => animation.animationName === 'zt-panel-enter'))).toBe(true)
   const animationName = await page.evaluate(() => {
     window.api.ZtMessageBox.close()
     return getComputedStyle(document.querySelector('.zt-box')).animationName
   })
-  expect(animationName).toBe('none')
+  expect(animationName).toBe('zt-panel-exit')
   expect(await page.evaluate(() => window.boxPromise)).toBeNull()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })

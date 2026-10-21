@@ -17,7 +17,7 @@ for (const [service, variant] of [['ZtMessage', 'message'], ['ZtNotification', '
     await expect(first).toHaveClass(/zt-notice--visible/)
     const entrance = await first.evaluate(async element => {
       const animations = element.getAnimations()
-      const movement = animations.find(animation => animation.transitionProperty === 'transform')
+      const movement = animations.find(animation => animation.animationName === 'zt-notice-enter')
       if (!movement) throw new Error('Entrance must animate from a rendered starting position')
       await Promise.all(animations.map(animation => animation.ready))
       const duration = movement.effect.getTiming().duration
@@ -41,6 +41,15 @@ for (const [service, variant] of [['ZtMessage', 'message'], ['ZtNotification', '
     const positions = await page.evaluate(service => {
       const first = document.querySelector('[data-zt-id="first"]')
       const second = document.querySelector('[data-zt-id="second"]')
+      for (const animation of second.getAnimations()) animation.finish()
+      // Observe the real FLIP transition at creation, rather than racing the
+      // locator polling interval against its short lifetime on a loaded runner.
+      const slot = second.parentElement
+      slot.addEventListener('transitionrun', event => {
+        if (event.target === slot && event.propertyName === 'transform') {
+          slot.getAnimations().find(animation => animation.transitionProperty === 'transform')?.pause()
+        }
+      }, { once: true })
       const positions = { first: first.getBoundingClientRect().top, second: second.getBoundingClientRect().top }
       window.api[service].close('first')
       first.dispatchEvent(new TransitionEvent('transitionend', { propertyName: 'opacity', bubbles: true }))

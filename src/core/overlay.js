@@ -4,6 +4,7 @@ import { cssLength } from './dom.js'
 import { createFocusManager } from './focus-manager.js'
 import { enterLayer, isTopLayer, leaveLayer, subscribeLayerChanges } from './layer-manager.js'
 import { lockBody, unlockBody } from './scroll-lock.js'
+import { afterPanelExit, motionDuration, rememberExitPose } from './panel-motion.js'
 
 const controllers = []
 let overlaySequence = 0
@@ -151,7 +152,6 @@ export function createOverlay(kind, inputOptions = {}) {
   let media
   let narrow = false
   let showTimer
-  let closeTimer
   let resolveClosed
 
   const closed = new Promise(resolve => { resolveClosed = resolve })
@@ -234,6 +234,7 @@ export function createOverlay(kind, inputOptions = {}) {
       (dialogMotion.active || elements.layer.classList.contains('zt-dialog--fullscreen') !== isExpanded) &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const previousBounds = animateResize ? dialogMotion.read() : undefined
+    if (animateResize) elements.layer.classList.add('zt-overlay--settled')
     if (active) dialogMotion?.reset()
     elements.layer.style.zIndex = String(zIndex)
     elements.title.textContent = options.title || '详情'
@@ -336,7 +337,6 @@ export function createOverlay(kind, inputOptions = {}) {
 
   function finishClose(reason, value) {
     clearTimeout(showTimer)
-    clearTimeout(closeTimer)
     dialogMotion?.reset()
     cleanContent()
     focusManager.release()
@@ -354,6 +354,7 @@ export function createOverlay(kind, inputOptions = {}) {
 
   function beginClose(reason, value) {
     if (destroying) return
+    clearTimeout(showTimer)
     const closingBounds = dialogMotion?.active ? dialogMotion.read() : undefined
     dialogMotion?.reset()
     destroying = true
@@ -362,19 +363,9 @@ export function createOverlay(kind, inputOptions = {}) {
     if (reason === 'cancel') invoke('onCancel')
     renderState()
     if (closingBounds) dialogMotion.freeze(closingBounds)
+    rememberExitPose(elements.panel)
     elements.layer.classList.add('zt-overlay--leaving')
-    let finished = false
-    const finish = () => {
-      if (finished) return
-      finished = true
-      elements.layer.removeEventListener('transitionend', onTransitionEnd)
-      finishClose(reason, value)
-    }
-    const onTransitionEnd = event => {
-      if (event.target === elements.layer && event.propertyName === 'opacity') finish()
-    }
-    elements.layer.addEventListener('transitionend', onTransitionEnd)
-    closeTimer = setTimeout(finish, 320)
+    afterPanelExit(elements.layer, elements.panel, () => finishClose(reason, value))
   }
 
   const gate = createCloseGate({
@@ -481,7 +472,10 @@ export function createOverlay(kind, inputOptions = {}) {
   requestAnimationFrame(() => {
     if (!active) return
     elements.layer.classList.add('zt-overlay--visible')
-    showTimer = setTimeout(() => invoke('onShow', controls()), 280)
+    showTimer = setTimeout(() => {
+      elements.layer.classList.add('zt-overlay--settled')
+      invoke('onShow', controls())
+    }, Math.max(motionDuration(elements.panel, true), motionDuration(elements.panel)))
   })
 
   return instance

@@ -4,10 +4,13 @@ import test from 'node:test'
 
 const root = new URL('../../', import.meta.url)
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
+const lock = JSON.parse(await readFile(new URL('package-lock.json', root), 'utf8'))
 
 test('package publishes ESM, CSS, and declarations with zero runtime dependencies', async () => {
   assert.equal(pkg.name, '@ztechjs/zt-alert')
-  assert.equal(pkg.version, '0.1.2')
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/)
+  assert.equal(lock.version, pkg.version)
+  assert.equal(lock.packages[''].version, pkg.version)
   assert.equal(pkg.type, 'module')
   assert.equal(pkg.exports['.'].import, './dist/index.js')
   assert.equal(pkg.exports['.'].types, './types/index.d.ts')
@@ -16,6 +19,8 @@ test('package publishes ESM, CSS, and declarations with zero runtime dependencie
   await access(new URL('types/index.d.ts', root))
   await access(new URL('README.md', root))
   await access(new URL('LICENSE', root))
+  assert.ok(pkg.files.includes('CHANGELOG.md'))
+  await access(new URL('CHANGELOG.md', root))
 })
 
 test('source entry can be imported without browser globals', async () => {

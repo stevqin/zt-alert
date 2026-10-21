@@ -47,12 +47,12 @@ for (const [kind, width] of [['dialog', 1280], ['dialog', 320], ['drawer', 1280]
   })
 }
 
-test('dialog expands visibly to its final size over 280ms', async ({ page }) => {
+test('dialog rebounds visibly and settles over 560ms', async ({ page }) => {
   const motion = await page.evaluate(async () => {
     window.overlay = window.api.ZtDialog.open({ title: '展开动画', content: '内容', autoFocus: false })
     await new Promise(resolve => requestAnimationFrame(resolve))
     const panel = document.querySelector('.zt-dialog__panel')
-    const animation = panel.getAnimations().find(animation => animation.transitionProperty === 'transform')
+    const animation = panel.getAnimations().find(animation => animation.animationName === 'zt-panel-enter')
     if (!animation) return { animated: false }
     await animation.ready
     animation.pause()
@@ -67,7 +67,7 @@ test('dialog expands visibly to its final size over 280ms', async ({ page }) => 
     return result
   })
   expect(motion.animated).toBe(true)
-  expect(motion.duration).toBe(280)
+  expect(motion.duration).toBe(560)
   expect(motion.start.x).toBeLessThanOrEqual(0.95)
   expect(motion.start.y).toBeLessThanOrEqual(0.9)
   expect(motion.middle.y).toBeGreaterThan(motion.start.y)
