@@ -189,7 +189,6 @@ function renderBox(model, controller) {
     stroke.style.setProperty('--zt-box-stroke-length', Math.ceil(stroke.getTotalLength()) + 2)
     stroke.classList.add('zt-box__icon-stroke')
   }
-  requestAnimationFrame(() => layer.classList.add('zt-box-layer--visible'))
   return { actions, box, layer }
 }
 
@@ -212,6 +211,7 @@ function openMessageBox(params) {
   let settled = false
   let closing = false
   let timer
+  let entranceFrame
 
   const controller = {
     id,
@@ -259,6 +259,7 @@ function openMessageBox(params) {
     destroy(value, immediate = false) {
       if (closing) return
       closing = true
+      cancelAnimationFrame(entranceFrame)
       clearTimeout(timer)
       rememberExitPose(controller.elements.box)
       controller.elements.layer.classList.add('zt-box-layer--leaving')
@@ -291,6 +292,13 @@ function openMessageBox(params) {
   current = controller
   lockBody(id)
   controller.focus.activate()
+  // Let the hidden pose paint before starting the shared box/icon timeline.
+  // A single rAF still runs in the initial page's first rendering opportunity.
+  entranceFrame = requestAnimationFrame(() => {
+    entranceFrame = requestAnimationFrame(() => {
+      if (!closing) controller.elements.layer.classList.add('zt-box-layer--visible')
+    })
+  })
 
   let maskStart = false
   controller.elements.layer.addEventListener('mousedown', event => { maskStart = event.target === controller.elements.layer })

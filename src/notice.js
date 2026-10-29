@@ -56,7 +56,7 @@ export function createNoticeService({ variant, defaultDuration }) {
   function schedule(item) {
     if (item.timer) clearTimeout(item.timer)
     item.timer = undefined
-    if (item.options.duration > 0) {
+    if (item.visible && item.options.duration > 0) {
       item.timer = setTimeout(() => close(item.id), item.options.duration)
     }
   }
@@ -153,15 +153,18 @@ export function createNoticeService({ variant, defaultDuration }) {
     slot.append(element)
     ensureHost().append(slot)
     prepareIcon(element.querySelector('.zt-notice__icon'))
-    // Commit the hidden starting frame so insertion cannot skip the entrance transition.
-    void element.offsetHeight
+    // Give the hidden pose a rendering opportunity before starting movement,
+    // icon drawing and the auto-close countdown together.
     item.frame = requestAnimationFrame(() => {
-      item.frame = undefined
-      if (items.get(id) !== item || item.closing) return
-      item.visible = true
-      item.motion = 'entering'
-      element.classList.add('zt-notice--visible', 'zt-notice--entering')
-      watchEntrance(item, 'zt-notice-enter')
+      item.frame = requestAnimationFrame(() => {
+        item.frame = undefined
+        if (items.get(id) !== item || item.closing) return
+        item.visible = true
+        item.motion = 'entering'
+        element.classList.add('zt-notice--visible', 'zt-notice--entering')
+        watchEntrance(item, 'zt-notice-enter')
+        schedule(item)
+      })
     })
     return item
   }

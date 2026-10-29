@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <script type="module">
+    import { ZtDialog, ZtDrawer, ZtLoading } from '/src/index.js'
+
+    const kind = new URLSearchParams(location.search).get('kind')
+    if (kind === 'loading') ZtLoading.open('首次加载')
+    else if (kind === 'drawer') ZtDrawer.open({ title: '首次加载', content: '内容' })
+    else ZtDialog.open({ title: '首次加载', content: '内容', fullscreen: kind === 'fullscreen' })
+    const layer = document.querySelector('.zt-overlay, .zt-loading-layer')
+    const panel = layer.querySelector('.zt-overlay__panel, .zt-loading')
+    requestAnimationFrame(() => {
+      window.firstFrame = {
+        visible: layer.className.includes('--visible'),
+        opacity: Number(getComputedStyle(layer).opacity)
+      }
+      const until = performance.now() + 250
+      while (performance.now() < until) { /* busy startup frame */ }
+      requestAnimationFrame(() => {
+        window.entranceTime = panel.getAnimations()[0]?.currentTime ?? null
+      })
+    })
+  </script>
+</body>
+</html>

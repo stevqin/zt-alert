@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <script type="module">
+    import { ZtMessage, ZtNotification } from '/src/index.js'
+
+    const notices = [
+      [ZtMessage, 'message'],
+      [ZtNotification, 'notification']
+    ].map(([service, id]) => {
+      service.success({ id, title: '页面加载完成', content: '首次加载提示', duration: 120 })
+      // Updating a pending notice must not start its countdown early either.
+      service.success({ id, title: '页面加载完成', content: '数据已准备好', duration: 120 })
+      return document.querySelector(`[data-zt-id="${id}"]`)
+    })
+    requestAnimationFrame(() => {
+      window.firstFrame = notices.map(element => ({
+        visible: element.classList.contains('zt-notice--visible'),
+        opacity: Number(getComputedStyle(element).opacity)
+      }))
+      const until = performance.now() + 250
+      while (performance.now() < until) { /* busy startup frame */ }
+      requestAnimationFrame(() => {
+        window.entrances = notices.map(element => ({
+          connected: element.isConnected,
+          closing: element.classList.contains('zt-notice--leaving'),
+          time: element.getAnimations().find(animation => animation.animationName === 'zt-notice-enter')?.currentTime ?? null
+        }))
+      })
+    })
+  </script>
+</body>
+</html>

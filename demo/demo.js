@@ -238,3 +238,28 @@ document.addEventListener('click', event => {
   if (!button) return
   actions[button.dataset.action]?.()
 })
+
+// A repeatable preview of a MessageBox opened as the page finishes loading.
+if (new URLSearchParams(location.search).get('message-box') === 'on-load') {
+  const preview = () => previewBox({
+    icon: 'success',
+    title: '页面加载完成',
+    text: '这是页面加载完成时直接弹出的 MessageBox。刷新页面可再次查看完整出场动画。'
+  })
+  if (document.readyState === 'complete') preview()
+  else window.addEventListener('load', preview, { once: true })
+}
+
+const startupNotice = new URLSearchParams(location.search).get('notices')
+if (['on-load', 'message', 'notification'].includes(startupNotice)) {
+  const preview = () => {
+    if (startupNotice !== 'notification') {
+      ZtMessage.success({ content: '页面加载完成，Message 从顶部轻弹入场。', duration: 0 })
+    }
+    if (startupNotice !== 'message') {
+      ZtNotification.info({ title: '页面加载完成', content: 'Notification 从右侧滑入。刷新页面可再次查看出场动画。', duration: 0 })
+    }
+  }
+  if (document.readyState === 'complete') preview()
+  else window.addEventListener('load', preview, { once: true })
+}

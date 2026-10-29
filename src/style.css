@@ -229,16 +229,27 @@
   place-items: center;
   box-sizing: border-box;
   padding: 24px;
+  font: 14px/1.55 var(--zt-font);
+  isolation: isolate;
+}
+
+/* Fade the mask independently so it cannot dim the panel's launch. */
+.zt-box-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background: rgba(19, 30, 48, 0.34);
   opacity: 0;
   transition: opacity 180ms ease;
-  font: 14px/1.55 var(--zt-font);
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
 }
 
-.zt-box-layer--visible { opacity: 1; }
-.zt-box-layer--leaving { opacity: 1; background-color: transparent; pointer-events: none; transition: background-color 350ms ease; }
+.zt-box-layer--visible::before { opacity: 1; }
+.zt-box-layer--leaving { pointer-events: none; }
+.zt-box-layer--leaving::before { opacity: 0; transition-duration: 350ms; }
 
 .zt-box {
   --zt-box-accent: var(--zt-accent-ink);
@@ -259,16 +270,18 @@
   box-shadow: 0 28px 80px rgba(16, 31, 55, 0.25), 0 0 0 1px rgba(33, 55, 85, 0.06);
   color: var(--zt-ink);
   text-align: center;
+  opacity: 0;
   transform: translateY(12px) scale(0.97);
   transition: opacity 180ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 
-.zt-box-layer--visible .zt-box { transform: none; }
+.zt-box-layer--visible .zt-box { opacity: 1; transform: none; }
 .zt-box-layer--leaving .zt-box { animation: zt-panel-exit 350ms linear both; transition: none; }
-.zt-box-layer--leaving.zt-box-layer--steady { opacity: 0; transition: opacity 180ms ease; }
+.zt-box-layer--leaving.zt-box-layer--steady::before { transition-duration: 180ms; }
 .zt-box-layer--leaving .zt-box:not(.zt-box--shake) { animation: none; transform: scale(0.97); }
+.zt-box-layer--leaving.zt-box-layer--steady .zt-box { opacity: 0; transition: opacity 180ms ease, transform 180ms ease; }
 .zt-box--shake {
   --zt-box-icon-delay: calc(var(--zt-box-enter-duration) * 0.33);
   transform: scale(0.82);
@@ -731,6 +744,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .zt-box-layer,
+  .zt-box-layer::before,
   .zt-overlay { transition: none !important; }
   .zt-loading-layer,
   .zt-loading-layer .zt-loading { transition: none; transform: none; }

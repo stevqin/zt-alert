@@ -175,7 +175,10 @@ function open(input) {
   syncLayerStates()
   panel.getBoundingClientRect()
   enterFrame = requestAnimationFrame(() => {
-    if (!controller.closing) layer.classList.add('zt-loading-layer--visible')
+    enterFrame = requestAnimationFrame(() => {
+      enterFrame = undefined
+      if (!controller.closing) layer.classList.add('zt-loading-layer--visible')
+    })
   })
   return instance
 }

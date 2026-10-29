@@ -10,7 +10,7 @@ for (const kind of ['box', 'dialog']) {
   const selector = kind === 'box' ? '.zt-box' : '.zt-dialog__panel'
   const layer = kind === 'box' ? '.zt-box-layer' : '.zt-dialog'
   const open = async page => {
-    await page.evaluate(kind => {
+    await page.evaluate(async kind => {
       window.finished = false
       if (kind === 'box') {
         window.api.ZtMessageBox({ title: '果冻弹跳', icon: 'success' }).then(() => { window.finished = true })
@@ -20,6 +20,14 @@ for (const kind of ['box', 'dialog']) {
         window.overlay.closed.then(() => { window.finished = true })
         window.closeOverlay = () => window.overlay.close()
       }
+      const root = document.querySelector(kind === 'box' ? '.zt-box-layer' : '.zt-dialog')
+      while (!root.className.includes('--visible')) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
+      // Sample the entrance in the browser frame, before driver latency can
+      // consume the entire animation on a busy machine.
+      root.querySelector(kind === 'box' ? '.zt-box' : '.zt-dialog__panel')
+        .getAnimations().forEach(animation => animation.pause())
     }, kind)
     await expect(page.locator(layer)).toHaveClass(/--visible/)
   }

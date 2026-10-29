@@ -50,7 +50,9 @@ for (const [kind, width] of [['dialog', 1280], ['dialog', 320], ['drawer', 1280]
 test('dialog rebounds visibly and settles over 560ms', async ({ page }) => {
   const motion = await page.evaluate(async () => {
     window.overlay = window.api.ZtDialog.open({ title: '展开动画', content: '内容', autoFocus: false })
-    await new Promise(resolve => requestAnimationFrame(resolve))
+    while (!document.querySelector('.zt-dialog').classList.contains('zt-overlay--visible')) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
     const panel = document.querySelector('.zt-dialog__panel')
     const animation = panel.getAnimations().find(animation => animation.animationName === 'zt-panel-enter')
     if (!animation) return { animated: false }

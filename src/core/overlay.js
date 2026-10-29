@@ -152,6 +152,7 @@ export function createOverlay(kind, inputOptions = {}) {
   let media
   let narrow = false
   let showTimer
+  let entranceFrame
   let resolveClosed
 
   const closed = new Promise(resolve => { resolveClosed = resolve })
@@ -354,6 +355,7 @@ export function createOverlay(kind, inputOptions = {}) {
 
   function beginClose(reason, value) {
     if (destroying) return
+    cancelAnimationFrame(entranceFrame)
     clearTimeout(showTimer)
     const closingBounds = dialogMotion?.active ? dialogMotion.read() : undefined
     dialogMotion?.reset()
@@ -469,13 +471,17 @@ export function createOverlay(kind, inputOptions = {}) {
     // Commit the collapsed state even when automatic focus is disabled.
     elements.panel.getBoundingClientRect()
   }
-  requestAnimationFrame(() => {
-    if (!active) return
-    elements.layer.classList.add('zt-overlay--visible')
-    showTimer = setTimeout(() => {
-      elements.layer.classList.add('zt-overlay--settled')
-      invoke('onShow', controls())
-    }, Math.max(motionDuration(elements.panel, true), motionDuration(elements.panel)))
+  // Let the hidden pose paint before starting the panel and mask timelines.
+  entranceFrame = requestAnimationFrame(() => {
+    entranceFrame = requestAnimationFrame(() => {
+      entranceFrame = undefined
+      if (!active) return
+      elements.layer.classList.add('zt-overlay--visible')
+      showTimer = setTimeout(() => {
+        elements.layer.classList.add('zt-overlay--settled')
+        invoke('onShow', controls())
+      }, Math.max(motionDuration(elements.panel, true), motionDuration(elements.panel)))
+    })
   })
 
   return instance

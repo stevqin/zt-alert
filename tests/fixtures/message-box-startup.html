@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <script type="module">
+    import { ZtMessageBox } from '/src/index.js'
+
+    window.boxPromise = ZtMessageBox({ title: '首次加载提示', icon: 'success' })
+    const layer = document.querySelector('.zt-box-layer')
+    requestAnimationFrame(() => {
+      // Simulate other startup work in the first rendering opportunity.
+      window.firstFrame = {
+        visible: layer.classList.contains('zt-box-layer--visible'),
+        opacity: Number(getComputedStyle(layer.querySelector('.zt-box')).opacity)
+      }
+      const until = performance.now() + 250
+      while (performance.now() < until) { /* busy startup frame */ }
+      requestAnimationFrame(() => {
+        const entrance = layer.querySelector('.zt-box').getAnimations()
+          .find(animation => animation.animationName === 'zt-panel-enter')
+        window.entranceTime = entrance?.currentTime ?? null
+      })
+    })
+  </script>
+</body>
+</html>

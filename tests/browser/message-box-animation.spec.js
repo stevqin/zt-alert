@@ -10,7 +10,9 @@ async function openPausedBox(page, options) {
     window.boxPromise = window.api.ZtMessageBox(options)
     // Pause in the first rendered frame, before a slow test runner can miss
     // the short entrance. The real CSS animations remain available to sample.
-    await new Promise(resolve => requestAnimationFrame(resolve))
+    while (!document.querySelector('.zt-box-layer').classList.contains('zt-box-layer--visible')) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
     for (const animation of document.querySelector('.zt-box').getAnimations({ subtree: true })) animation.pause()
   }, options)
 }
