@@ -1,7 +1,5 @@
 # @ztechjs/zt-alert Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Build and package five framework-free imperative feedback APIs for npm as `@ztechjs/zt-alert`.
 
 **Architecture:** Focused ES modules implement notices and interactive overlays on native DOM. Dialog, Drawer, and MessageBox share stack, focus, close-gate, and body-lock services while keeping their public behavior independent.

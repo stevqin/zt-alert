@@ -88,7 +88,7 @@
 
 
 
-/* Lighter travel and deformation than the centered Modal / MessageBox. */
+/* Notices use subtle travel and deformation for lightweight feedback. */
 .zt-notice--entering.zt-notice--visible { animation: zt-notice-enter 440ms linear backwards; }
 .zt-notice--reviving.zt-notice--visible { animation: zt-notice-revive 220ms cubic-bezier(.22, 1, .36, 1) backwards; }
 @keyframes zt-notice-enter {
@@ -292,7 +292,7 @@
 }
 .zt-box--danger { --zt-box-accent: var(--zt-error); --zt-box-soft: #fff0ef; }
 
-/* Sample the same damped travel and delayed deformation as ZtModal.
+/* Damped panel travel with delayed stretch and compression.
    spring(t) = exp(-4.8t) * (cos(13t) + 4.8/13 * sin(13t)). */
 @keyframes zt-panel-enter {
   0% { opacity: 0; transform: translate3d(0, 54px, 0) scale(0.9, 0.84); }
