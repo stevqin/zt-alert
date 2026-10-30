@@ -1,6 +1,6 @@
 {
   "name": "@ztechjs/zt-alert",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Framework-free message, notification, message box, dialog, drawer, and loading APIs.",
   "type": "module",
   "license": "MIT",
